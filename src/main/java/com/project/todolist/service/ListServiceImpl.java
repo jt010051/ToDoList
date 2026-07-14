@@ -1,6 +1,7 @@
 package com.project.todolist.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -17,75 +18,33 @@ import lombok.extern.slf4j.Slf4j;
 
 public class ListServiceImpl implements ListService {
 	private final ListRepository repository;
-	private final ItemService itemServe;
+	
 	@Override
 	public ListOfItems createList(String name) {
-		ListOfItems list = new ListOfItems(null, name, false, new ArrayList<>());
+		ListOfItems list = new ListOfItems(null, name, false,
+				new ArrayList<>());
 		repository.save(list);
 		return list;
 	}
 
 	@Override
-	public ListOfItems getList(String listName) {
-		
-		return repository.findByListName(listName);
+	public ListOfItems getList(Long id) {
+			return repository.findById(id).orElseThrow();
 	}
 
 	@Override
 	public List<ListOfItems> getAllLists() {
-		// TODO Auto-generated method stub
 		return repository.findAll();
 	}
 
 	@Override
-	public void addToList(String item, String listName) {
-		
-		try {
-			Item i = itemServe.getItem(item);
-			if(i == null)
-				i = itemServe.createItem(item);
-			ListOfItems list = repository.findByListName(listName);
-			list.getThisList().add(i);
-			repository.save(list);
-			
-		}
-		catch(Exception e) {
-			
-		}
-	}
-	@Override
-	public void deleteFromList(String item, String listName) {
-		
-		try {
-			Item i = itemServe.getItem(item);
-	
-			ListOfItems list = repository.findByListName(listName);
-
-			for(int j = 0; j < list.getThisList().size(); j++) {
-				if(list.getThisList().get(j) == i) {
-					list.getThisList().remove(j);
-					break;
-				}
-					
-			}
-			itemServe.deleteItem(item);
-
-			repository.save(list);
-			
-		}
-		catch(Exception e) {
-			
-		}
-	}
-
-	@Override
-	public void deleteList(String listName) {
+	public void deleteList(Long id) {
 			try {
-				ListOfItems list = repository.findByListName(listName);
-				for(Item item : list.getThisList()) {
-					deleteFromList(listName, item.getItemName());
-				}
+				ListOfItems list = repository.findById(id).orElseThrow();
+
 				
+				
+				repository.delete(list);
 			}
 			catch(Exception e) {
 				log.info(e.toString());
@@ -93,24 +52,33 @@ public class ListServiceImpl implements ListService {
 	}
 
 	@Override
-	public void markItemComplete(String listName, String item) {
-		
+	public void markList(Long id) {
+		ListOfItems list = repository.findById(id).orElseThrow();
+
 		try {
-			ListOfItems list = repository.findByListName(listName);
-			itemServe.markItem(item);
+		list.setListComplete(!list.isListComplete());
+		for(Item i : list.getItems()) 
+			i.setComplete(true);
+		repository.save(list);
+		}
+		catch(Exception e) {
+			log.info(e.toString());
+
+		}
+	}
+
+	@Override
+	public void editList(ListOfItems list) {
+		try {
 			
-			for(Item it : list.getThisList()) {
-				if(it.getItemName() == item) {
-					it.setComplete(!it.isComplete());
-					break;
-				}
-			}
 			repository.save(list);
-			
+	
 		}
 		catch(Exception e) {
 			
-		}		
+		}
 	}
+
+	
 
 }

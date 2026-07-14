@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,34 +25,36 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ListController {
 public final ListService service;
+
 	@PostMapping("/create/{thisList}")
-	public ListOfItems createItem(@PathVariable String thisList) {
-		ListOfItems list = service.createList(thisList);
-		
+	public ListOfItems createList(@PathVariable String thisList) {
+		ListOfItems list = service.createList(thisList);	
 		return list;
 	}
 	@GetMapping("/allLists")
 	public List<ListOfItems> getAllLists(){
 		return service.getAllLists();
 	}
-	@GetMapping("/{listName}")
-	public ListOfItems getList(@PathVariable String listName) {
-		return service.getList(listName);
+
+	@GetMapping("/{id}")
+	public ListOfItems getList(@PathVariable Long id) {
+		return service.getList(id);
 	}
-	@PutMapping("/addToList/{listName}/{item}")
-	public void addToList(@PathVariable String item, @PathVariable String listName) {
-		service.addToList(item, listName );
+	
+
+	@PutMapping("/edit")
+	public void editlist(@RequestBody ListOfItems list) {
+		service.editList(list);
+			
 	}
-	@DeleteMapping("/deleteFromList/{item}/{listName}")
-	public void deleteFromList(@PathVariable String item, @PathVariable String listName) {
-		service.deleteFromList(item, listName);
+
+
+	@DeleteMapping("/deleteList/{id}")
+	public void deleteList(@PathVariable Long id) {
+		service.deleteList(id);
 	}
-	@DeleteMapping("/deleteList/{listName}")
-	public void deleteList(@PathVariable String listName) {
-		service.deleteList(listName);
-	}
-	@PutMapping("/setMarked/{item}/{listName}")
-	public void setMarked(@PathVariable String item, @PathVariable String listName) {
-		service.markItemComplete(listName, item);
+	@PutMapping("/setMarked/{id}")
+	public void setItemMarked(@PathVariable Long id) {
+		service.markList(id);
 	}
 }

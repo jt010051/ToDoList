@@ -7,11 +7,12 @@ import com.project.todolist.domain.ListOfItems;
 
 public interface ListService {
 	ListOfItems createList(String name);
-	ListOfItems getList(String listName);
+	ListOfItems getList(Long id);
 	List<ListOfItems> getAllLists();
-	void addToList(String listName,  String item);
-	void markItemComplete(String listName,  String item);
 
-	void deleteList(String listName);
-	void deleteFromList(String listName, String item);
+	void editList(ListOfItems list);
+
+
+	void markList(Long id);
+	void deleteList(Long id);
 }

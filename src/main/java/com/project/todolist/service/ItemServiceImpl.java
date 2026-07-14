@@ -1,12 +1,15 @@
 package com.project.todolist.service;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.project.todolist.domain.Item;
+import com.project.todolist.domain.ListOfItems;
 import com.project.todolist.repository.ItemRepository;
+import com.project.todolist.repository.ListRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -15,10 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service @RequiredArgsConstructor @Transactional @Slf4j
 public class ItemServiceImpl  implements ItemService{
 	private final ItemRepository repository;
+	private final ListRepository listRepo;
 	@Override
-	public Item createItem(String item) {
-		Item i = new Item(null, item, false);
+	public Item createItem(String item, Long id) {
+		ListOfItems list = listRepo.findById(id).orElseThrow();
+		Item i = new Item(null, item, false, list);
 		repository.save(i);
+	
+		
 		return i;
 	}
 
@@ -29,11 +36,10 @@ public class ItemServiceImpl  implements ItemService{
 
 
 	@Override
-	public void editItemName(String item, String originalItem) {
+	public void editItem(Item item) {
 			try {
-				Item i = repository.findByItemName(originalItem);
-				i.setItemName(item);
-				repository.save(i);
+			
+				repository.save(item);
 			}
 			catch(Exception e) {
 				log.error(e.toString());
@@ -42,23 +48,25 @@ public class ItemServiceImpl  implements ItemService{
 	}
 
 	@Override
-	public void deleteItem(String  item) {
-		Item i = repository.findByItemName(item);
-				repository.delete(i);
+	public void deleteItem(Long id) {
+		Item item = repository.findById(id).orElseThrow();
+				repository.delete(item);
 	}
 
 	@Override
-	public void markItem(String item) {
-		 Item i = repository.findByItemName(item);
-		 i.setComplete(!i.isComplete());
-		 repository.save(i);
+	public void markItem(Long id) {
+		Item item = repository.findById(id).orElseThrow();
+
+		 item.setComplete(!item.isComplete());
+		 
+		 repository.save(item);
 	}
 
 	@Override
-	public Item getItem(String item) {
+	public Item getItem(Long item) {
 		Item i = null;
 		try {
-			i = repository.findByItemName(item);
+			i = repository.findById(item).orElseThrow();
 		}
 		catch(Exception e) {
 			
