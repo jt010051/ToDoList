@@ -11,6 +11,8 @@ import { Button } from 'react-bootstrap'
     const [editList, setEditList] = useState(false)
     const [listName, setListName] = useState('');
     const [deleteList, setDeleteList] = useState(false)
+    const [isChecked, setIsChecked] = useState(false);
+
     const getAllLists = async () =>{
       localStorage.removeItem('list') 
       const listsInDatabase = await axios.get('lists/allLists')
@@ -19,18 +21,67 @@ import { Button } from 'react-bootstrap'
 
     const handleChange = (e) =>{
       const { name, value } = e.target;
-      setListName(e.target.value)
-      const updateName = () => {
         setCurrentList(prevList => ({
           ...prevList,      
           [name]: value       
         }));
        
         
-};
+
  console.log(value);
     }
 
+  const handleChangeNewList = (e) =>{
+          setListName(e.target.value)
+          console.log(e.target.value);
+          
+  }  
+const handleCheckboxChange = (list) =>{
+  console.log(list);
+  
+        setCurrentList(list);
+       setIsChecked(!isChecked)
+}
+useEffect(()=>{
+   markComplete()
+},[isChecked])
+useEffect(()=>{
+handleDeleteList()
+}, [deleteList])
+    const handleDeleteList = async(e) =>{  
+    if(!currentList.id)
+        return
+    try{
+      
+        const response = await axios.delete(`lists/deleteList/${currentList.id}`)
+        console.log(response);
+        setListName('')
+        setIsChecked(false)
+        setDeleteList(false)
+        setListName('')
+        setCurrentList({})  
+        getAllLists()
+      }
+      catch(error){
+        console.log(error);
+        
+      }
+    }
+
+const markComplete = async(e)=>{
+  if(!currentList.id)
+    return
+  try{
+    const response = await axios.put(`/lists/setMarked/${currentList.id}`)
+    console.log(response);
+    getAllLists()
+    
+  }
+  catch(error){
+    console.log(error);
+    
+  }
+}
     const handleEditList = async(e) =>{  
       console.log(currentList);
       
@@ -39,10 +90,11 @@ import { Button } from 'react-bootstrap'
         const response = await axios.put('lists/edit', currentList)
         console.log(response);
         setListName('')
+        setIsChecked(false)
         getAllLists()
       }
-      catch(e){
-        console.log(e);
+      catch(error){
+        console.log(error);
         
       }
     }
@@ -74,13 +126,18 @@ useEffect(()=>{
                   return(
                       <div key = {list[1].id}>
                         <li>
+                             <input
+                            type="checkbox"
+                            checked={list[1].listComplete ? true : false}
+                            onChange={() => handleCheckboxChange(list[1])}
+                          />
                           <Link to='cList' 
                             onClick={() => localStorage.setItem('list', 
                               JSON.stringify(list))}> 
                                 {list[1].listName}
                             </Link>       
                             {editList 
-                            && currentList === list[1]
+                            && listName === list[1].listName
                             ? 
                              <div>
                           <h1>Edit List</h1>
@@ -97,7 +154,7 @@ useEffect(()=>{
                           <Button onClick={() => {
                             setEditList(false)
                             setListName('')
-                            setCurrentList([])
+                            setCurrentList({})
                           }}>Cancel</Button>
                         </div>
                       </div> 
@@ -111,8 +168,16 @@ useEffect(()=>{
                              }}>Edit List</Button>   
 
                             }
-                            <Button>Delete List</Button> 
+                            <Button onClick={()=> {
+                              setEditList(false)
+                              setCreateList(false)
+                              setDeleteList(true)
+                              setListName(list[1].listName)
+                               setCurrentList(list[1])  
+                             }}>Delete List</Button> 
+                         
                         </li>
+                         
                     </div>
                   )
                   
@@ -129,7 +194,7 @@ useEffect(()=>{
                                 <label htmlFor="listName">Name:</label>
                                   <input id="listName" name="listName" type="text"  
                                     value={listName}
-                                    onChange={handleChange}/>
+                                    onChange={handleChangeNewList}/>
                               </div>
                               <Button type="submit">Submit</Button>
                             </form>

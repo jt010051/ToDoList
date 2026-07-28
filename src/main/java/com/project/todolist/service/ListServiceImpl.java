@@ -53,12 +53,16 @@ public class ListServiceImpl implements ListService {
 
 	@Override
 	public void markList(Long id) {
-		ListOfItems list = repository.findById(id).orElseThrow();
 
 		try {
+		ListOfItems list = repository.findById(id).orElseThrow();
 		list.setListComplete(!list.isListComplete());
 		for(Item i : list.getItems()) 
-			i.setComplete(true);
+			if(list.isListComplete())			
+					i.setComplete(true);
+			else
+				i.setComplete(false);
+
 		repository.save(list);
 		}
 		catch(Exception e) {

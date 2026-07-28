@@ -42,9 +42,10 @@ public class ItemController {
 		service.createItem(itemName, id);
 		  return ResponseEntity.ok().build();
 	}
-	@PutMapping("/edit")
-	public ResponseEntity<Item> editItem(@RequestBody Item item){
-		service.editItem(item);
+	@PutMapping("/edit/{listId}")
+	public ResponseEntity<Item> editItem(@PathVariable Long listId,
+			@RequestBody Item item){
+		service.editItem(item, listId);
 		return ResponseEntity.ok().build();
 	}
 	@DeleteMapping("/delete/{id}")

@@ -36,10 +36,10 @@ public class ItemServiceImpl  implements ItemService{
 
 
 	@Override
-	public void editItem(Item item) {
+	public void editItem(Item item, Long id) {
 			try {
-			
-				repository.save(item);
+					item.setList(listRepo.findById(id).orElseThrow());
+					repository.save(item);
 			}
 			catch(Exception e) {
 				log.error(e.toString());
